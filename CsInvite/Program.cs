@@ -7,6 +7,10 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using CsInvite.Messaging;
+using CsInvite.Messaging.Discord;
+using CsInvite.Messaging.Steam;
+using CsInvite.Bot;
 
 namespace CsInvite
 {
@@ -14,6 +18,15 @@ namespace CsInvite
     {
         public static void Main(string[] args)
         {
+            var bot = new InviteBot();
+            var steam = new Steam();
+            steam.Connect();
+
+            var discord = new Discord();
+            discord.Connect();
+
+            steam.MessageReceived += bot.OnMessageReceived;
+            discord.MessageReceived += bot.OnMessageReceived;
             BuildWebHost(args).Run();
         }
 
