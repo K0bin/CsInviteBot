@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using SteamKit2;
 using CsInvite.Messaging.Base;
+using Microsoft.Extensions.Configuration;
 
 namespace CsInvite.Messaging.Steam
 {
@@ -19,8 +20,12 @@ namespace CsInvite.Messaging.Steam
 
         private bool isRunning = false;
 
-        public Steam()
+        private IConfiguration configuration;
+
+        public Steam(IConfiguration configuration)
         {
+            this.configuration = configuration;
+
             manager = new CallbackManager(steamClient);
             user = steamClient.GetHandler<SteamUser>();
             friends = steamClient.GetHandler<SteamFriends>();
@@ -60,8 +65,8 @@ namespace CsInvite.Messaging.Steam
         {
             user.LogOn(new SteamUser.LogOnDetails()
             {
-                Username = Secret.SteamUsername,
-                Password = Secret.SteamPassword
+                Username = configuration["SteamUsername"],
+                Password = configuration["SteamPassword"]
             });
         }
 

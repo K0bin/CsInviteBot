@@ -4,17 +4,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using CsInvite.Messaging.Base;
+using Microsoft.Extensions.Configuration;
 
 namespace CsInvite.Messaging.Discord
 {
     public class Discord: MessagingService
     {
         private DiscordClient discord;
-        public Discord()
+        public Discord(IConfiguration configuration)
         {
             discord = new DiscordClient(new DiscordConfiguration()
             {
-                Token = Secret.DiscordToken,
+                Token = configuration["DiscordToken"],
                 TokenType = TokenType.Bot
             });
             discord.MessageCreated += OnMessageCreated;

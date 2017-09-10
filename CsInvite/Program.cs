@@ -18,20 +18,27 @@ namespace CsInvite
     {
         public static void Main(string[] args)
         {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile("secret.json");
+            var configuration = builder.Build();
+
             var bot = new InviteBot();
-            var steam = new Steam();
+            var steam = new Steam(configuration);
             steam.Connect();
 
-            var discord = new Discord();
+            var discord = new Discord(configuration);
             discord.Connect();
 
             steam.MessageReceived += bot.OnMessageReceived;
             discord.MessageReceived += bot.OnMessageReceived;
-            BuildWebHost(args).Run();
+            BuildWebHost(args, configuration).Run();
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
+        public static IWebHost BuildWebHost(string[] args, IConfiguration config) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseConfiguration(config)
                 .UseStartup<Startup>()
                 .Build();
     }
