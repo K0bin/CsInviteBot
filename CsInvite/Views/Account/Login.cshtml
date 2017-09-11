@@ -7,7 +7,7 @@
 
     @foreach (var scheme in Model)
     {
-        <form action="/login" method="post">
+        <form asp-controller="Account" asp-action="LoginExternal" method="post">
             <input type="hidden" name="Provider" value="@scheme.Name" />
             <input type="hidden" name="ReturnUrl" value="@ViewBag.ReturnUrl" />
 

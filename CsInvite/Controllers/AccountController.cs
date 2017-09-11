@@ -14,36 +14,50 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using CsInvite.Messaging.Steam;
 using System.Security.Claims;
 using Microsoft.Extensions.Options;
+using CsInvite.Models.ViewModels;
+using CsInvite.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace CsInvite.Controllers
 {
+    [Authorize]
     public class AccountController : Controller
     {
         private UserManager<User> userManager;
         private SignInManager<User> signInManager;
         private ILogger logger;
         private Steam steam;
+        private string steamApiKey;
 
-        public AccountController(Steam steam, SignInManager<User> signInManager, UserManager<User> userManager, ILoggerFactory loggerFactory)
+        public AccountController(Steam steam, SignInManager<User> signInManager, UserManager<User> userManager, IConfiguration configuration, ILoggerFactory loggerFactory)
         {
             this.steam = steam;
             this.signInManager = signInManager;
             this.userManager = userManager;
+            steamApiKey = configuration["SteamApiKey"];
             this.logger = loggerFactory.CreateLogger<AccountController>();
         }
 
-        [HttpGet("~/Login")]
-        public async Task<IActionResult> Login()
+        [HttpGet("~/Login"), HttpGet("Account/Login")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Login(string returnUrl = null)
         {
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
+            ViewData["returnUrl"] = returnUrl;
+
             return View(await HttpContext.GetExternalProvidersAsync());
         }
 
-        [HttpPost("~/Login")]
-        public async Task<IActionResult> Login([FromForm] string provider)
+        [HttpPost("~/LoginExternal"), HttpPost("Account/LoginExternal")]
+        [AllowAnonymous]
+        public async Task<IActionResult> LoginExternal([FromForm] string provider, string returnUrl = null)
         {
+            ViewData["returnUrl"] = returnUrl;
+
             if (string.IsNullOrWhiteSpace(provider))
             {
                 return BadRequest();
@@ -59,6 +73,7 @@ namespace CsInvite.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Callback(string returnUrl = null, string remoteError = null)
         {
             Console.WriteLine("Callback: "+User?.Identity?.IsAuthenticated);
@@ -82,10 +97,29 @@ namespace CsInvite.Controllers
             }
             else
             {
+                var steamId = new Uri(info.ProviderKey).Segments.Last();
+
+                string displayName = "";
+                using (var client = new HttpClient())
+                {
+                    // Query steam user summary endpoint
+                    var response = await client.GetAsync($"http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={steamApiKey}&amp;steamids={steamId}");
+
+                    // If result not OK, throw error
+                    response.EnsureSuccessStatusCode();
+
+                    // Deserialize json and return player DTO
+                    var stringResponse = await response.Content.ReadAsStringAsync();
+
+                    // Get display name
+                    var player = JsonConvert.DeserializeObject<SteamPlayerSummaryRootObject>(stringResponse).Response.Players[0];
+                }
+
                 var identity = info.Principal.Identity;
                 var user = new User
                 {
-                    UserName = identity.Name
+                    UserName = displayName,
+                    SteamId = steamId
                 };
                 var userManagerResult = await userManager.CreateAsync(user);
                 if (userManagerResult.Succeeded)
@@ -103,14 +137,37 @@ namespace CsInvite.Controllers
             }
         }
 
-        [HttpGet(), HttpPost()]
-        public IActionResult Logout()
+        [HttpGet]
+        public async Task<IActionResult> Settings()
         {
-            // Instruct the cookies middleware to delete the local cookie created
-            // when the user agent is redirected from the external identity provider
-            // after a successful authentication flow (e.g Google or Facebook).
-            return SignOut(new AuthenticationProperties { RedirectUri = "/" },
-                CookieAuthenticationDefaults.AuthenticationScheme);
+            var user = await userManager.GetUserAsync(User);
+
+            ViewData["Maps"] = Maps.ActiveMaps;
+            return View(new AccountSettingsViewModel
+            {
+                PermaBan = user.Permaban
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Settings(AccountSettingsViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await userManager.GetUserAsync(User);
+                user.Permaban = model.PermaBan;
+                await userManager.UpdateAsync(user);
+            }
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
+
+        [HttpGet(), HttpPost()]
+        public async Task<IActionResult> Logout()
+        {
+            await signInManager.SignOutAsync();
+            logger.LogInformation(4, "User logged out.");
+            return RedirectToAction(nameof(HomeController.Index), "Home");
         }
 
         private IActionResult RedirectToLocal(string returnUrl)

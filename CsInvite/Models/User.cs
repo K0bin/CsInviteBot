@@ -13,10 +13,6 @@ namespace CsInvite.Models
         {
             get; set;
         }
-        public string DisplayName
-        {
-            get; set;
-        }
         public Map Permaban
         {
             get; set;

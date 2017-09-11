@@ -1,4 +1,16 @@
-﻿
-@*
-    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-*@
+@using CsInvite.Models;
+@using CsInvite.Models.ViewModels;
+@model AccountSettingsViewModel
+
+<div>
+    <form asp-controller="Account" asp-action="settings" method="post">
+        <select asp-for="PermaBan" name="permaban">
+            @foreach (var map in ViewBag.Maps)
+            {
+                var selected = (map == Model.PermaBan) ? "selected" : "";
+                <option value="@((int)map)" selected="@selected">@map.ToString()</option>
+            }
+            <input type="submit" value="Go!" />
+        </select>
+    </form>
+</div>
