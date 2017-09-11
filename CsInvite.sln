@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsInvite", "CsInvite\CsInvite.csproj", "{F55736AD-9777-4D81-AB9F-AC4E96F7DE40}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CsInvite", "CsInvite\CsInvite.csproj", "{F55736AD-9777-4D81-AB9F-AC4E96F7DE40}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNet.Security.OpenId.Steam", "AspNet.Security.OpenId.Providers\src\AspNet.Security.OpenId.Steam\AspNet.Security.OpenId.Steam.csproj", "{74055B1A-1B84-41B7-9686-436B786ECDE5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNet.Security.OpenId", "AspNet.Security.OpenId.Providers\src\AspNet.Security.OpenId\AspNet.Security.OpenId.csproj", "{3E9AFF33-AED1-4EA4-B734-A1400A6BC574}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{F55736AD-9777-4D81-AB9F-AC4E96F7DE40}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F55736AD-9777-4D81-AB9F-AC4E96F7DE40}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F55736AD-9777-4D81-AB9F-AC4E96F7DE40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74055B1A-1B84-41B7-9686-436B786ECDE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74055B1A-1B84-41B7-9686-436B786ECDE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74055B1A-1B84-41B7-9686-436B786ECDE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74055B1A-1B84-41B7-9686-436B786ECDE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E9AFF33-AED1-4EA4-B734-A1400A6BC574}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E9AFF33-AED1-4EA4-B734-A1400A6BC574}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E9AFF33-AED1-4EA4-B734-A1400A6BC574}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E9AFF33-AED1-4EA4-B734-A1400A6BC574}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

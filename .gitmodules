@@ -1,0 +1,3 @@
+[submodule "AspNet.Security.OpenId.Providers"]
+	path = AspNet.Security.OpenId.Providers
+	url = https://github.com/JoyMoe/AspNet.Security.OpenId.Providers.git

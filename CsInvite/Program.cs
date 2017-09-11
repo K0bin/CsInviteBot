@@ -16,7 +16,13 @@ namespace CsInvite
 {
     public class Program
     {
+
         public static void Main(string[] args)
+        {
+            BuildWebHost(args).Run();
+        }
+
+        public static IWebHost BuildWebHost(string[] args)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -24,22 +30,11 @@ namespace CsInvite
                 .AddJsonFile("secret.json");
             var configuration = builder.Build();
 
-            var bot = new InviteBot();
-            var steam = new Steam(configuration);
-            steam.Connect();
-
-            var discord = new Discord(configuration);
-            discord.Connect();
-
-            steam.MessageReceived += bot.OnMessageReceived;
-            discord.MessageReceived += bot.OnMessageReceived;
-            BuildWebHost(args, configuration).Run();
-        }
-
-        public static IWebHost BuildWebHost(string[] args, IConfiguration config) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseConfiguration(config)
+            return WebHost.CreateDefaultBuilder(args)
+                .UseKestrel()
+                .UseConfiguration(configuration)
                 .UseStartup<Startup>()
                 .Build();
+        }
     }
 }
