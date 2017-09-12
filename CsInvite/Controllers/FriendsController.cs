@@ -4,11 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CsInvite.Models;
-using CsInvite.Models.ViewModels.Friends;
+using CsInvite.Website.Models;
+using CsInvite.Website.Models.ViewModels.Friends;
 using Microsoft.AspNetCore.Identity;
+using CsInvite.Shared.Models;
 
-namespace CsInvite.Controllers
+namespace CsInvite.Website.Controllers
 {
     [Authorize]
     public class FriendsController : Controller

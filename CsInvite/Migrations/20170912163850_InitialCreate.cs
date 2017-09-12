@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
 
-namespace CsInvite.Migrations
+namespace CsInvite.Website.Migrations
 {
     public partial class InitialCreate : Migration
     {
@@ -12,10 +13,10 @@ namespace CsInvite.Migrations
                 name: "AspNetRoles",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    NormalizedName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true)
+                    Id = table.Column<string>(type: "varchar(127)", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "longtext", nullable: true),
+                    Name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -26,22 +27,24 @@ namespace CsInvite.Migrations
                 name: "AspNetUsers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
-                    LockoutEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    PasswordHash = table.Column<string>(type: "TEXT", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
-                    SecurityStamp = table.Column<string>(type: "TEXT", nullable: true),
-                    SteamId = table.Column<string>(type: "TEXT", nullable: true),
-                    TwoFactorEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
-                    UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true)
+                    Id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "longtext", nullable: true),
+                    Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    FriendsWithSteamBotIndex = table.Column<int>(type: "int", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    PasswordHash = table.Column<string>(type: "longtext", nullable: true),
+                    Permaban = table.Column<int>(type: "int", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "longtext", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    SecurityStamp = table.Column<string>(type: "longtext", nullable: true),
+                    SteamId = table.Column<ulong>(type: "bigint unsigned", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -49,14 +52,29 @@ namespace CsInvite.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Friends",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false),
+                    FriendUserId = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true),
+                    LastInvite = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Priority = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Friends", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ClaimType = table.Column<string>(type: "TEXT", nullable: true),
-                    ClaimValue = table.Column<string>(type: "TEXT", nullable: true),
-                    RoleId = table.Column<string>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ClaimType = table.Column<string>(type: "longtext", nullable: true),
+                    ClaimValue = table.Column<string>(type: "longtext", nullable: true),
+                    RoleId = table.Column<string>(type: "varchar(127)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -73,11 +91,11 @@ namespace CsInvite.Migrations
                 name: "AspNetUserClaims",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ClaimType = table.Column<string>(type: "TEXT", nullable: true),
-                    ClaimValue = table.Column<string>(type: "TEXT", nullable: true),
-                    UserId = table.Column<string>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ClaimType = table.Column<string>(type: "longtext", nullable: true),
+                    ClaimValue = table.Column<string>(type: "longtext", nullable: true),
+                    UserId = table.Column<string>(type: "varchar(36)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -94,10 +112,10 @@ namespace CsInvite.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(type: "TEXT", nullable: false),
-                    ProviderKey = table.Column<string>(type: "TEXT", nullable: false),
-                    ProviderDisplayName = table.Column<string>(type: "TEXT", nullable: true),
-                    UserId = table.Column<string>(type: "TEXT", nullable: false)
+                    LoginProvider = table.Column<string>(type: "varchar(127)", nullable: false),
+                    ProviderKey = table.Column<string>(type: "varchar(127)", nullable: false),
+                    ProviderDisplayName = table.Column<string>(type: "longtext", nullable: true),
+                    UserId = table.Column<string>(type: "varchar(36)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -114,8 +132,8 @@ namespace CsInvite.Migrations
                 name: "AspNetUserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "TEXT", nullable: false),
-                    RoleId = table.Column<string>(type: "TEXT", nullable: false)
+                    UserId = table.Column<string>(type: "varchar(36)", nullable: false),
+                    RoleId = table.Column<string>(type: "varchar(127)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -138,10 +156,10 @@ namespace CsInvite.Migrations
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "TEXT", nullable: false),
-                    LoginProvider = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Value = table.Column<string>(type: "TEXT", nullable: true)
+                    UserId = table.Column<string>(type: "varchar(36)", nullable: false),
+                    LoginProvider = table.Column<string>(type: "varchar(127)", nullable: false),
+                    Name = table.Column<string>(type: "varchar(127)", nullable: false),
+                    Value = table.Column<string>(type: "longtext", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -208,6 +226,9 @@ namespace CsInvite.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "Friends");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

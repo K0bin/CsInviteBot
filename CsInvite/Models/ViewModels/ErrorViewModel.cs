@@ -1,6 +1,6 @@
 using System;
 
-namespace CsInvite.Models.ViewModels
+namespace CsInvite.Website.Models.ViewModels
 {
     public class ErrorViewModel
     {

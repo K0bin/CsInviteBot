@@ -8,34 +8,57 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
 
-namespace CsInvite.Migrations
+namespace CsInvite.Website.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20170911171255_InitialCreate")]
+    [Migration("20170912163850_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
                 .HasAnnotation("ProductVersion", "2.0.0-rtm-26452");
 
-            modelBuilder.Entity("CsInvite.Data.User", b =>
+            modelBuilder.Entity("CsInvite.Models.Friend", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(36);
+
+                    b.Property<string>("FriendUserId")
+                        .HasMaxLength(36);
+
+                    b.Property<DateTime>("LastInvite");
+
+                    b.Property<int>("Priority");
+
+                    b.Property<string>("UserId")
+                        .HasMaxLength(36);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Friends");
+                });
+
+            modelBuilder.Entity("CsInvite.Models.User", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(36);
 
                     b.Property<int>("AccessFailedCount");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
 
-                    b.Property<string>("DisplayName");
-
                     b.Property<string>("Email")
                         .HasMaxLength(256);
 
                     b.Property<bool>("EmailConfirmed");
+
+                    b.Property<int?>("FriendsWithSteamBotIndex");
 
                     b.Property<bool>("LockoutEnabled");
 
@@ -49,13 +72,15 @@ namespace CsInvite.Migrations
 
                     b.Property<string>("PasswordHash");
 
+                    b.Property<int>("Permaban");
+
                     b.Property<string>("PhoneNumber");
 
                     b.Property<bool>("PhoneNumberConfirmed");
 
                     b.Property<string>("SecurityStamp");
 
-                    b.Property<string>("SteamId");
+                    b.Property<ulong>("SteamId");
 
                     b.Property<bool>("TwoFactorEnabled");
 
@@ -191,7 +216,7 @@ namespace CsInvite.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("CsInvite.Data.User")
+                    b.HasOne("CsInvite.Models.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -199,7 +224,7 @@ namespace CsInvite.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("CsInvite.Data.User")
+                    b.HasOne("CsInvite.Models.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -212,7 +237,7 @@ namespace CsInvite.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("CsInvite.Data.User")
+                    b.HasOne("CsInvite.Models.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -220,7 +245,7 @@ namespace CsInvite.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("CsInvite.Data.User")
+                    b.HasOne("CsInvite.Models.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);

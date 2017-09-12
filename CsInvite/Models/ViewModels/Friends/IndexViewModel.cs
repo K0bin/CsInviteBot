@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CsInvite.Models.ViewModels.Friends
+namespace CsInvite.Website.Models.ViewModels.Friends
 {
     public class IndexViewModel
     {

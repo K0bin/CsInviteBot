@@ -4,8 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using CsInvite.Shared.Models;
 
-namespace CsInvite.Models
+namespace CsInvite.Website.Models
 {
     public class ApplicationDbContext: IdentityDbContext<User>
     {

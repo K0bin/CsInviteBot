@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CsInvite.Models.ViewModels.Account
+namespace CsInvite.Website.Models.ViewModels.Account
 {
     public class SettingsViewModel
     {

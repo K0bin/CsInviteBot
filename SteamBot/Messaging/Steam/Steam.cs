@@ -41,8 +41,11 @@ namespace CsInvite.Messaging.Steam
             manager.Subscribe<SteamFriends.ChatMsgCallback>(OnChatMessage);
             manager.Subscribe<SteamFriends.FriendMsgEchoCallback>(OnChatMessage);
             manager.Subscribe<SteamGameCoordinator.MessageCallback>(OnGameCoordinator);
+            manager.Subscribe<SteamFriends.FriendAddedCallback>(OnFriendsListChanged);
+            manager.Subscribe<SteamFriends.IgnoreFriendCallback>(OnFriendsListChanged);
 
             steamThread = new Thread(this.ConnectOnThread);
+            this.Connect();
         }
 
         public void Connect()
@@ -103,6 +106,15 @@ namespace CsInvite.Messaging.Steam
 
         }
 
+        private void SyncFriends()
+        {
+            var friends = GetFriends();
+            foreach (var friend in friends)
+            {
+                
+            }
+        }
+
         private void OnChatMessage(SteamFriends.FriendMsgCallback callback)
         {
             if (callback.EntryType == EChatEntryType.ChatMsg)
@@ -138,6 +150,16 @@ namespace CsInvite.Messaging.Steam
         }
 
         private void OnGameCoordinator(SteamGameCoordinator.MessageCallback callback)
+        {
+
+        }
+
+        private void OnFriendsListChanged(SteamFriends.FriendAddedCallback callback)
+        {
+
+        }
+
+        private void OnFriendsListChanged(SteamFriends.IgnoreFriendCallback callback)
         {
 
         }

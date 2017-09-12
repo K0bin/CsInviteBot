@@ -4,9 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using CsInvite.Models.ViewModels;
+using CsInvite.Website.Models.ViewModels;
 
-namespace CsInvite.Controllers
+namespace CsInvite.Website.Controllers
 {
     public class HomeController : Controller
     {

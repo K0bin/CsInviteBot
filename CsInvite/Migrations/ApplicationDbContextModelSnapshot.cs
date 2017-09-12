@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
 
-namespace CsInvite.Migrations
+namespace CsInvite.Website.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -17,20 +17,24 @@ namespace CsInvite.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
                 .HasAnnotation("ProductVersion", "2.0.0-rtm-26452");
 
             modelBuilder.Entity("CsInvite.Models.Friend", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(36);
 
-                    b.Property<string>("FriendUserId");
+                    b.Property<string>("FriendUserId")
+                        .HasMaxLength(36);
 
                     b.Property<DateTime>("LastInvite");
 
                     b.Property<int>("Priority");
 
-                    b.Property<string>("UserId");
+                    b.Property<string>("UserId")
+                        .HasMaxLength(36);
 
                     b.HasKey("Id");
 
@@ -40,7 +44,8 @@ namespace CsInvite.Migrations
             modelBuilder.Entity("CsInvite.Models.User", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(36);
 
                     b.Property<int>("AccessFailedCount");
 
@@ -51,6 +56,8 @@ namespace CsInvite.Migrations
                         .HasMaxLength(256);
 
                     b.Property<bool>("EmailConfirmed");
+
+                    b.Property<int?>("FriendsWithSteamBotIndex");
 
                     b.Property<bool>("LockoutEnabled");
 
@@ -72,7 +79,7 @@ namespace CsInvite.Migrations
 
                     b.Property<string>("SecurityStamp");
 
-                    b.Property<string>("SteamId");
+                    b.Property<ulong>("SteamId");
 
                     b.Property<bool>("TwoFactorEnabled");
 

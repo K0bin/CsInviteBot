@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CsInvite.Extensions
+namespace CsInvite.Website.Extensions
 {
     public static class HttpContextExtensions
     {

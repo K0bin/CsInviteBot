@@ -1,18 +1,17 @@
-﻿using CsInvite.Bot;
-using Microsoft.AspNetCore.Identity;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
 using CsInvite.Shared.Models;
 
-namespace CsInvite.Website.Models
+namespace CsInvite.SteamBot.Models
 {
-    public class User: IdentityUser
+    [Table("AspNetUsers")]
+    class User
     {
         [Key, Required, MaxLength(36)]
-        public override string Id { get => base.Id; set => base.Id = value; }
+        public string Id { get; set; }
 
         public ulong SteamId
         {

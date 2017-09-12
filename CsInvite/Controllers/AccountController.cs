@@ -1,25 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-using CsInvite.Models;
-using System.Net.Http;
-using Newtonsoft.Json;
-using Microsoft.Extensions.Logging;
+﻿using CsInvite.Website.Extensions;
+using CsInvite.Website.Models;
+using CsInvite.Website.Models.ViewModels.Account;
+using CsInvite.Shared.Models;
 using Microsoft.AspNetCore.Authentication;
-using CsInvite.Extensions;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using CsInvite.Messaging.Steam;
-using System.Security.Claims;
-using Microsoft.Extensions.Options;
-using CsInvite.Models.ViewModels.Account;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 
-namespace CsInvite.Controllers
+namespace CsInvite.Website.Controllers
 {
     [Authorize]
     public class AccountController : Controller
@@ -28,12 +23,10 @@ namespace CsInvite.Controllers
         private SignInManager<User> signInManager;
         private ApplicationDbContext db;
         private ILogger logger;
-        private Steam steam;
         private string steamApiKey;
 
-        public AccountController(Steam steam, SignInManager<User> signInManager, UserManager<User> userManager, ApplicationDbContext db, IConfiguration configuration, ILoggerFactory loggerFactory)
+        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager, ApplicationDbContext db, IConfiguration configuration, ILoggerFactory loggerFactory)
         {
-            this.steam = steam;
             this.signInManager = signInManager;
             this.userManager = userManager;
             steamApiKey = configuration["SteamApiKey"];
@@ -133,11 +126,11 @@ namespace CsInvite.Controllers
                         logger.LogInformation(6, "User created an account using {Name} provider.", info.LoginProvider);
 
                         //Add on SteamBot
-                        var friends = steam.GetFriends();
+                        /*var friends = steam.GetFriends();
                         if (!friends.Contains(steamId))
                         {
                             steam.AddFriend(steamId);
-                        }
+                        }*/
 
                         return RedirectToLocal(returnUrl);
                     }

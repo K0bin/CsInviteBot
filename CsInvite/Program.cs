@@ -7,12 +7,8 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using CsInvite.Messaging;
-using CsInvite.Messaging.Discord;
-using CsInvite.Messaging.Steam;
-using CsInvite.Bot;
 
-namespace CsInvite
+namespace CsInvite.Website
 {
     public class Program
     {
@@ -32,6 +28,7 @@ namespace CsInvite
 
             return WebHost.CreateDefaultBuilder(args)
                 .UseKestrel()
+                .UseUrls("http://*:53003")
                 .UseConfiguration(configuration)
                 .UseStartup<Startup>()
                 .Build();
