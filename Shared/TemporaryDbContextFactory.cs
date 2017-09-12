@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +20,8 @@ namespace CsInvite.Shared
                 .AddJsonFile("appsettings.json")
                 .AddJsonFile("secret.json");
             var configuration = builder.Build();
-            return new ApplicationDbContext(new DbContextOptions<ApplicationDbContext>(), configuration);
+            var loggerFactory = new LoggerFactory();
+            return new ApplicationDbContext(new DbContextOptions<ApplicationDbContext>(), configuration, loggerFactory);
         }
     }
 }

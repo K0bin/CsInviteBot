@@ -29,5 +29,13 @@ namespace CsInvite.Shared.Models
         {
             get; set;
         }
+        public List<Friend> Friends
+        {
+            get; set;
+        }
+        public List<Friend> IsInFriendsListOf
+        {
+            get; set;
+        }
     }
 }

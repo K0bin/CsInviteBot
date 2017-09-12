@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace CsInvite.Shared.Models
@@ -9,6 +10,7 @@ namespace CsInvite.Shared.Models
     {
         [StringLength(36)]
         public string Id { get; set; }
+        public string OwnerId { get; set; }
         public User Owner { get; set; }
         public List<User> UserIds { get; set; }
         public DateTime Created { get; set; }

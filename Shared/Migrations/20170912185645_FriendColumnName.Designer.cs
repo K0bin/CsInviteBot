@@ -11,9 +11,10 @@ using System;
 namespace CsInvite.Shared.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20170912185645_FriendColumnName")]
+    partial class FriendColumnName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,9 +27,9 @@ namespace CsInvite.Shared.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(36);
 
-                    b.Property<DateTime>("LastInvite");
+                    b.Property<string>("FriendUserId");
 
-                    b.Property<string>("OtherUserId");
+                    b.Property<DateTime>("LastInvite");
 
                     b.Property<int>("Priority");
 
@@ -36,7 +37,7 @@ namespace CsInvite.Shared.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OtherUserId");
+                    b.HasIndex("FriendUserId");
 
                     b.HasIndex("UserId");
 
@@ -234,12 +235,12 @@ namespace CsInvite.Shared.Migrations
 
             modelBuilder.Entity("CsInvite.Shared.Models.Friend", b =>
                 {
-                    b.HasOne("CsInvite.Shared.Models.User", "OtherUser")
-                        .WithMany("IsInFriendsListOf")
-                        .HasForeignKey("OtherUserId");
+                    b.HasOne("CsInvite.Shared.Models.User", "FriendUser")
+                        .WithMany()
+                        .HasForeignKey("FriendUserId");
 
                     b.HasOne("CsInvite.Shared.Models.User", "User")
-                        .WithMany("Friends")
+                        .WithMany()
                         .HasForeignKey("UserId");
                 });
 
