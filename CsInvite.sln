@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Website", "CsInvite\Website.csproj", "{F55736AD-9777-4D81-AB9F-AC4E96F7DE40}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Website", "Website\Website.csproj", "{F55736AD-9777-4D81-AB9F-AC4E96F7DE40}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNet.Security.OpenId.Steam", "AspNet.Security.OpenId.Providers\src\AspNet.Security.OpenId.Steam\AspNet.Security.OpenId.Steam.csproj", "{74055B1A-1B84-41B7-9686-436B786ECDE5}"
 EndProject
@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNet.Security.OpenId", "A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jobs", "Jobs\Jobs.csproj", "{A780DE48-BFD9-4550-A3B2-D98AC6211339}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamBot", "SteamBot\SteamBot.csproj", "{41B655B3-1419-421B-8D70-459E115EA5AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bot", "Bot\Bot.csproj", "{41B655B3-1419-421B-8D70-459E115EA5AB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{6B3A9CA9-EB60-4D50-95F9-073C4D579798}"
 EndProject

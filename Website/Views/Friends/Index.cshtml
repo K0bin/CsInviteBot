@@ -1,0 +1,13 @@
+@using CsInvite.Website.Models.ViewModels.Friends
+@model IndexViewModel
+
+<div>
+    <ul>
+        @foreach (var friend in Model.Friends)
+        {
+            <li>
+                <img src="@friend.FriendUserId.AvatarUrl" />@friend.FriendUserId.UserName
+            </li>
+        }
+    </ul>
+</div>

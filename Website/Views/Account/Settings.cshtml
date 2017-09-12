@@ -1,0 +1,15 @@
+@using CsInvite.Website.Models.ViewModels.Account;
+@model SettingsViewModel
+
+<div>
+    <form asp-controller="Account" asp-action="settings" method="post">
+        <select asp-for="PermaBan" name="permaban">
+            @foreach (var map in ViewBag.Maps)
+            {
+                var selected = (map == Model.PermaBan) ? "selected" : "";
+                <option value="@((int)map)" selected="@selected">@map.ToString()</option>
+            }
+            <input type="submit" value="Go!" />
+        </select>
+    </form>
+</div>

@@ -1,0 +1,25 @@
+@using CsInvite.Website.Models.ViewModels.Friends
+@model SearchViewModel
+
+<div>
+    <form asp-controller="Friends" asp-action="Search" method="post">
+        <input asp-for="Query" type="text">
+        <input type="submit" value="Go" />
+    </form>
+
+    @if (Model?.Users != null)
+    {
+        <ul>
+            @foreach (var user in Model.Users)
+            {
+                <li>
+                    <form asp-controller="Friends" asp-action="AddFriend">
+                        <input type="hidden" name="id" value="@user.Id"/>
+                        <input type="hidden" name="query" value="@Model.Query" />
+                        <input type="submit" value="@user.UserName" />
+                    </form>
+                </li>
+            }
+        </ul>
+    }
+</div>
