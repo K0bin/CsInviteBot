@@ -157,9 +157,21 @@ namespace CsInvite.Messaging.Steam
             friends.SetPersonaState(EPersonaState.Online);
         }
 
-        public void AddFriend(uint steamId)
+        public void AddFriend(ulong steamId)
         {
-            friends.AddFriend(new SteamID { AccountID = steamId });
+            var id = new SteamID();
+            id.SetFromUInt64(steamId);
+            friends.AddFriend(id);
+        }
+
+        public List<ulong> GetFriends()
+        {
+            var friends = new List<ulong>();
+            for (int i = 0; i < this.friends.GetFriendCount(); i++)
+            {
+                friends.Add(this.friends.GetFriendByIndex(i).ConvertToUInt64());
+            }
+            return friends;
         }
     }
 }

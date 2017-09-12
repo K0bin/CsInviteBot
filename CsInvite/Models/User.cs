@@ -9,7 +9,7 @@ namespace CsInvite.Models
 {
     public class User: IdentityUser
     {
-        public string SteamId
+        public ulong SteamId
         {
             get; set;
         }

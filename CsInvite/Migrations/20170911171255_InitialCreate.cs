@@ -29,7 +29,6 @@ namespace CsInvite.Migrations
                     Id = table.Column<string>(type: "TEXT", nullable: false),
                     AccessFailedCount = table.Column<int>(type: "INTEGER", nullable: false),
                     ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true),
-                    DisplayName = table.Column<string>(type: "TEXT", nullable: true),
                     Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
                     LockoutEnabled = table.Column<bool>(type: "INTEGER", nullable: false),

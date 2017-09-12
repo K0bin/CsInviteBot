@@ -5,9 +5,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CsInvite.Models.ViewModels
+namespace CsInvite.Models.ViewModels.Account
 {
-    public class AccountSettingsViewModel
+    public class SettingsViewModel
     {
         [Required]
         public Map PermaBan

@@ -14,8 +14,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using CsInvite.Messaging.Steam;
 using System.Security.Claims;
 using Microsoft.Extensions.Options;
-using CsInvite.Models.ViewModels;
-using CsInvite.Models;
+using CsInvite.Models.ViewModels.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -27,17 +26,19 @@ namespace CsInvite.Controllers
     {
         private UserManager<User> userManager;
         private SignInManager<User> signInManager;
+        private ApplicationDbContext db;
         private ILogger logger;
         private Steam steam;
         private string steamApiKey;
 
-        public AccountController(Steam steam, SignInManager<User> signInManager, UserManager<User> userManager, IConfiguration configuration, ILoggerFactory loggerFactory)
+        public AccountController(Steam steam, SignInManager<User> signInManager, UserManager<User> userManager, ApplicationDbContext db, IConfiguration configuration, ILoggerFactory loggerFactory)
         {
             this.steam = steam;
             this.signInManager = signInManager;
             this.userManager = userManager;
             steamApiKey = configuration["SteamApiKey"];
             this.logger = loggerFactory.CreateLogger<AccountController>();
+            this.db = db;
         }
 
         [HttpGet("~/Login"), HttpGet("Account/Login")]
@@ -97,13 +98,13 @@ namespace CsInvite.Controllers
             }
             else
             {
-                var steamId = new Uri(info.ProviderKey).Segments.Last();
+                var steamId = ulong.Parse(new Uri(info.ProviderKey).Segments.Last());
 
                 string displayName = "";
                 using (var client = new HttpClient())
                 {
                     // Query steam user summary endpoint
-                    var response = await client.GetAsync($"http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={steamApiKey}&amp;steamids={steamId}");
+                    var response = await client.GetAsync($"http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={steamApiKey}&steamids={steamId}");
 
                     // If result not OK, throw error
                     response.EnsureSuccessStatusCode();
@@ -113,6 +114,7 @@ namespace CsInvite.Controllers
 
                     // Get display name
                     var player = JsonConvert.DeserializeObject<SteamPlayerSummaryRootObject>(stringResponse).Response.Players[0];
+                    displayName = player.PersonaName;
                 }
 
                 var identity = info.Principal.Identity;
@@ -129,6 +131,14 @@ namespace CsInvite.Controllers
                     {
                         await signInManager.SignInAsync(user, isPersistent: false);
                         logger.LogInformation(6, "User created an account using {Name} provider.", info.LoginProvider);
+
+                        //Add on SteamBot
+                        var friends = steam.GetFriends();
+                        if (!friends.Contains(steamId))
+                        {
+                            steam.AddFriend(steamId);
+                        }
+
                         return RedirectToLocal(returnUrl);
                     }
                 }
@@ -143,7 +153,7 @@ namespace CsInvite.Controllers
             var user = await userManager.GetUserAsync(User);
 
             ViewData["Maps"] = Maps.ActiveMaps;
-            return View(new AccountSettingsViewModel
+            return View(new SettingsViewModel
             {
                 PermaBan = user.Permaban
             });
@@ -151,13 +161,14 @@ namespace CsInvite.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Settings(AccountSettingsViewModel model)
+        public async Task<IActionResult> Settings(SettingsViewModel model)
         {
             if (ModelState.IsValid)
             {
                 var user = await userManager.GetUserAsync(User);
                 user.Permaban = model.PermaBan;
                 await userManager.UpdateAsync(user);
+                await db.SaveChangesAsync();
             }
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
