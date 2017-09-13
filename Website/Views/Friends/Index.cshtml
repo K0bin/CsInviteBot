@@ -2,11 +2,14 @@
 @model IndexViewModel
 
 <div>
+    <a asp-controller="Friends" asp-action="Search">Freund hinzuf&uuml;gen</a>
+    <br />
+    <a asp-controller="Friends" asp-action="Import">Freunde von Steam importieren</a>
     <ul>
         @foreach (var friend in Model.Friends)
         {
             <li>
-                <img src="@friend.FriendUserId.AvatarUrl" />@friend.FriendUserId.UserName
+                <img src="@friend.OtherUser?.AvatarUrl" />@friend.OtherUser?.UserName
             </li>
         }
     </ul>

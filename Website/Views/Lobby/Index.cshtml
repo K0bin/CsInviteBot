@@ -1,0 +1,14 @@
+﻿@using CsInvite.Website.Models.ViewModels.Lobby;
+@model IndexViewModel;
+
+<div>
+    <h1>Lobby vom @Model.ToString(), gestartet von @Model.Owner.UserName</h1>
+    <ul>
+        @foreach (var member in Model.Members)
+        {
+            <li>
+                <img src="@member.AvatarUrl" />@member.UserName
+            </li>
+        }
+    </ul>
+</div>

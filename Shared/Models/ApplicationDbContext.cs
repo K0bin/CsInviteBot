@@ -14,6 +14,7 @@ namespace CsInvite.Shared.Models
     {
         public DbSet<Friend> Friends { get; set; }
         public DbSet<Lobby> Lobbies { get; set; }
+        public DbSet<Invite> Invites { get; set; }
 
         private string connectionString;
         private ILoggerFactory loggerFactory;
@@ -35,28 +36,67 @@ namespace CsInvite.Shared.Models
         {
             base.OnModelCreating(builder);
 
-            /*
+            builder.Entity<Invite>()
+                .Property(i => i.Answer)
+                .HasDefaultValue(Answer.None);
             builder.Entity<User>()
-                .HasMany(u => u.Friends)
-                .WithOne(f => f.User);
+                .Property(u => u.Permaban)
+                .HasDefaultValue(Map.None);
+            builder.Entity<Invite>()
+                .Property(i => i.Date)
+                .HasDefaultValueSql("NOW(6)");
+            builder.Entity<Lobby>()
+                .Property(l => l.Created)
+                .HasDefaultValueSql("NOW(6)");
+            builder.Entity<Lobby>()
+                .Property(l => l.LastModified)
+                .HasDefaultValueSql("NOW(6)");
 
             builder.Entity<User>()
-                .HasMany(u => u.IsInFriendsListOf)
-                .WithOne(f => f.OtherUser);*/
+                .Property(u => u.UserName)
+                .IsUnicode(true);
 
             builder.Entity<Friend>()
                 .HasOne(f => f.User)
                 .WithMany(u => u.Friends)
                 .HasForeignKey(f => f.UserId)
-                .HasPrincipalKey(u => u.Id)
+                .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired();
 
             builder.Entity<Friend>()
                 .HasOne(f => f.OtherUser)
                 .WithMany(u => u.IsInFriendsListOf)
                 .HasForeignKey(f => f.OtherUserId)
-                .HasPrincipalKey(u => u.Id)
+                .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired();
+
+            builder.Entity<User>()
+                .HasOne(u => u.CurrentLobby)
+                .WithMany(l => l.Members)
+                .HasForeignKey(u => u.CurrentLobbyId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            builder.Entity<Invite>()
+                .HasOne(i => i.Recipient)
+                .WithMany(u => u.Invites)
+                .HasForeignKey(i => i.RecipientId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired(false);
+
+            builder.Entity<Lobby>()
+                .HasOne(l => l.Owner)
+                .WithMany(u => u.IsOwnerOf)
+                .HasForeignKey(l => l.OwnerId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+
+            builder.Entity<Invite>()
+                .HasOne(i => i.Lobby)
+                .WithMany(l => l.Invites)
+                .HasForeignKey(u => u.LobbyId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired(false);
         }
     }
 }

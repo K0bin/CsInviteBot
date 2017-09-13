@@ -9,13 +9,15 @@ namespace CsInvite.Shared.Models
 {
     public class Friend
     {
-        [StringLength(36)]
+        [Key, Required, StringLength(36)]
         public string Id { get; set; }
+        [StringLength(36), Required]
         public string UserId { get; set; }
         public User User { get; set; }
+        [StringLength(36), Required]
         public string OtherUserId { get; set; }
         public User OtherUser { get; set; }
+        [Required]
         public int Priority { get; set; }
-        public DateTime LastInvite { get; set; }
     }
 }

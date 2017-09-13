@@ -13,6 +13,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using CsInvite.Website.Models.Steam;
 
 namespace CsInvite.Website.Controllers
 {
@@ -23,15 +24,15 @@ namespace CsInvite.Website.Controllers
         private SignInManager<User> signInManager;
         private ApplicationDbContext db;
         private ILogger logger;
-        private string steamApiKey;
+        private Steam steam;
 
-        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager, ApplicationDbContext db, IConfiguration configuration, ILoggerFactory loggerFactory)
+        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager, ApplicationDbContext db, Steam steam, ILoggerFactory loggerFactory)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
-            steamApiKey = configuration["SteamApiKey"];
             this.logger = loggerFactory.CreateLogger<AccountController>();
             this.db = db;
+            this.steam = steam;
         }
 
         [HttpGet("~/Login"), HttpGet("Account/Login")]
@@ -93,31 +94,27 @@ namespace CsInvite.Website.Controllers
             {
                 var steamId = ulong.Parse(new Uri(info.ProviderKey).Segments.Last());
 
-                SteamPlayerSummaryDto player = null;
-                using (var client = new HttpClient())
-                {
-                    // Query steam user summary endpoint
-                    var response = await client.GetAsync($"http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={steamApiKey}&steamids={steamId}");
-
-                    // If result not OK, throw error
-                    response.EnsureSuccessStatusCode();
-
-                    // Deserialize json and return player DTO
-                    var stringResponse = await response.Content.ReadAsStringAsync();
-
-                    // Get display name
-                    player = JsonConvert.DeserializeObject<SteamPlayerSummaryRootObject>(stringResponse).Response.Players[0];
-                }
+                SteamPlayerSummary player = await steam.GetSteamPlayer(steamId);
 
                 var identity = info.Principal.Identity;
-                var user = new User
+                var user = db.Users.FirstOrDefault(u => u.SteamId == steamId);
+                var userExists = user != null;
+                if (!userExists)
                 {
-                    UserName = player?.PersonaName,
-                    AvatarUrl = player?.PersonaName,
-                    SteamId = steamId
-                };
-                var userManagerResult = await userManager.CreateAsync(user);
-                if (userManagerResult.Succeeded)
+                    user = new User
+                    {
+                        SteamId = steamId
+                    };
+                }
+                user.UserName = player?.PersonaName;
+                user.AvatarUrl = player?.AvatarFull;
+
+                IdentityResult userManagerResult = null;
+                if (!userExists)
+                {
+                    userManagerResult = await userManager.CreateAsync(user);
+                }
+                if (userExists || userManagerResult.Succeeded)
                 {
                     userManagerResult = await userManager.AddLoginAsync(user, info);
                     if (userManagerResult.Succeeded)

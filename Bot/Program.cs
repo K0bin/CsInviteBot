@@ -17,17 +17,9 @@ namespace CsInvite.Bot
                 .AddJsonFile("secret.json");
             var configuration = builder.Build();
 
-            var steam = new Steam.Steam(configuration);
-            steam.Connect();
-
             using (var bot = new InviteBot(configuration))
             {
-                steam.MessageReceived += bot.OnMessageReceived;
-
-                while (true)
-                {
-                    Thread.Sleep(100);
-                }
+                bot.Run();
             }
         }
     }

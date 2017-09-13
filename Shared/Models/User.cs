@@ -13,6 +13,7 @@ namespace CsInvite.Shared.Models
         [Key, Required, MaxLength(36)]
         public override string Id { get => base.Id; set => base.Id = value; }
 
+        [Key, Required]
         public ulong SteamId
         {
             get; set;
@@ -37,5 +38,13 @@ namespace CsInvite.Shared.Models
         {
             get; set;
         }
+        public string CurrentLobbyId { get; set; }
+        public Lobby CurrentLobby
+        {
+            get; set;
+        }
+
+        public List<Lobby> IsOwnerOf { get; set; }
+        public List<Invite> Invites { get; set; }
     }
 }

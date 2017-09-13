@@ -11,7 +11,7 @@ using System;
 namespace CsInvite.Shared.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20170912180842_Initial")]
+    [Migration("20170913164149_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,21 +27,77 @@ namespace CsInvite.Shared.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(36);
 
-                    b.Property<string>("FriendUserIdId");
-
-                    b.Property<DateTime>("LastInvite");
+                    b.Property<string>("OtherUserId")
+                        .IsRequired()
+                        .HasMaxLength(36);
 
                     b.Property<int>("Priority");
 
-                    b.Property<string>("UserId");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(36);
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FriendUserIdId");
+                    b.HasIndex("OtherUserId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("Friends");
+                });
+
+            modelBuilder.Entity("CsInvite.Shared.Models.Invite", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(36);
+
+                    b.Property<int>("Answer")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime>("Date")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValueSql("NOW(6)");
+
+                    b.Property<string>("LobbyId")
+                        .HasMaxLength(36);
+
+                    b.Property<string>("RecipientId")
+                        .HasMaxLength(36);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LobbyId");
+
+                    b.HasIndex("RecipientId");
+
+                    b.ToTable("Invites");
+                });
+
+            modelBuilder.Entity("CsInvite.Shared.Models.Lobby", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(36);
+
+                    b.Property<DateTime>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValueSql("NOW(6)");
+
+                    b.Property<DateTime>("LastModified")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValueSql("NOW(6)");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasMaxLength(36);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("Lobbies");
                 });
 
             modelBuilder.Entity("CsInvite.Shared.Models.User", b =>
@@ -52,8 +108,12 @@ namespace CsInvite.Shared.Migrations
 
                     b.Property<int>("AccessFailedCount");
 
+                    b.Property<string>("AvatarUrl");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
+
+                    b.Property<string>("CurrentLobbyId");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256);
@@ -61,6 +121,8 @@ namespace CsInvite.Shared.Migrations
                     b.Property<bool>("EmailConfirmed");
 
                     b.Property<int?>("FriendsWithSteamBotIndex");
+
+                    b.Property<string>("LobbyId");
 
                     b.Property<bool>("LockoutEnabled");
 
@@ -74,7 +136,9 @@ namespace CsInvite.Shared.Migrations
 
                     b.Property<string>("PasswordHash");
 
-                    b.Property<int>("Permaban");
+                    b.Property<int>("Permaban")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0);
 
                     b.Property<string>("PhoneNumber");
 
@@ -90,6 +154,12 @@ namespace CsInvite.Shared.Migrations
                         .HasMaxLength(256);
 
                     b.HasKey("Id");
+
+                    b.HasAlternateKey("Id", "SteamId");
+
+                    b.HasIndex("CurrentLobbyId");
+
+                    b.HasIndex("LobbyId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasName("EmailIndex");
@@ -210,13 +280,48 @@ namespace CsInvite.Shared.Migrations
 
             modelBuilder.Entity("CsInvite.Shared.Models.Friend", b =>
                 {
-                    b.HasOne("CsInvite.Shared.Models.User", "FriendUserId")
-                        .WithMany()
-                        .HasForeignKey("FriendUserIdId");
+                    b.HasOne("CsInvite.Shared.Models.User", "OtherUser")
+                        .WithMany("IsInFriendsListOf")
+                        .HasForeignKey("OtherUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("CsInvite.Shared.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
+                        .WithMany("Friends")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("CsInvite.Shared.Models.Invite", b =>
+                {
+                    b.HasOne("CsInvite.Shared.Models.Lobby", "Lobby")
+                        .WithMany("Invites")
+                        .HasForeignKey("LobbyId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("CsInvite.Shared.Models.User", "Recipient")
+                        .WithMany("Invites")
+                        .HasForeignKey("RecipientId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("CsInvite.Shared.Models.Lobby", b =>
+                {
+                    b.HasOne("CsInvite.Shared.Models.User", "Owner")
+                        .WithMany("IsOwnerOf")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("CsInvite.Shared.Models.User", b =>
+                {
+                    b.HasOne("CsInvite.Shared.Models.Lobby", "CurrentLobby")
+                        .WithMany("Members")
+                        .HasForeignKey("CurrentLobbyId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CsInvite.Shared.Models.Lobby")
+                        .WithMany("IsLastInviteOf")
+                        .HasForeignKey("LobbyId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

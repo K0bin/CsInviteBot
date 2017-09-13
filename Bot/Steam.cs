@@ -4,12 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using SteamKit2;
-using CsInvite.Bot.Base;
 using Microsoft.Extensions.Configuration;
 
-namespace CsInvite.Bot.Steam
+namespace CsInvite.Bot
 {
-    public class Steam: MessagingService
+    public class Steam
     {
         private SteamClient steamClient = new SteamClient();
         private CallbackManager manager;
@@ -18,9 +17,14 @@ namespace CsInvite.Bot.Steam
 
         private Thread steamThread;
 
-        private bool isRunning = false;
+        public bool IsRunning { get; private set; } = false;
 
         private IConfiguration configuration;
+        
+        public InviteBot Bot
+        {
+            get; set;
+        }
 
         public Steam(IConfiguration configuration)
         {
@@ -38,28 +42,23 @@ namespace CsInvite.Bot.Steam
 
             manager.Subscribe<SteamUser.AccountInfoCallback>(OnAccountInfo);
             manager.Subscribe<SteamFriends.FriendMsgCallback>(OnChatMessage);
-            manager.Subscribe<SteamFriends.ChatMsgCallback>(OnChatMessage);
-            manager.Subscribe<SteamFriends.FriendMsgEchoCallback>(OnChatMessage);
             manager.Subscribe<SteamGameCoordinator.MessageCallback>(OnGameCoordinator);
             manager.Subscribe<SteamFriends.FriendAddedCallback>(OnFriendsListChanged);
             manager.Subscribe<SteamFriends.IgnoreFriendCallback>(OnFriendsListChanged);
-
-            steamThread = new Thread(this.ConnectOnThread);
+            
         }
 
         public void Connect()
         {
-            steamThread.Start();
-        }
-
-        private void ConnectOnThread()
-        {
             steamClient.Connect();
-            isRunning = true;
-
-            while (isRunning)
+            IsRunning = true;
+        }
+        
+        public void Update()
+        {
+            if (IsRunning)
             {
-                manager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
+                manager.RunWaitCallbacks();
             }
         }
 
@@ -74,7 +73,7 @@ namespace CsInvite.Bot.Steam
 
         private void OnDisconnected(SteamClient.DisconnectedCallback callback)
         {
-            isRunning = false;
+            IsRunning = false;
         }
 
         private void OnLoggedOn(SteamUser.LoggedOnCallback callback)
@@ -89,13 +88,13 @@ namespace CsInvite.Bot.Steam
 
                     Console.WriteLine("Unable to logon to Steam: This account is SteamGuard protected.");
 
-                    isRunning = false;
+                    IsRunning = false;
                     return;
                 }
 
                 Console.WriteLine("Unable to logon to Steam: {0} / {1}", callback.Result, callback.ExtendedResult);
 
-                isRunning = false;
+                IsRunning = false;
                 return;
             }
         }
@@ -118,33 +117,7 @@ namespace CsInvite.Bot.Steam
         {
             if (callback.EntryType == EChatEntryType.ChatMsg)
             {
-                OnMessageReceived(new Message()
-                {
-                    Text = callback.Message,
-                    Chat = new Chat()
-                    {
-                        Id = callback.Sender
-                    }
-                });
-            }
-        }
-
-        private void OnChatMessage(SteamFriends.FriendMsgEchoCallback callback)
-        {
-            if (callback.EntryType == EChatEntryType.ChatMsg)
-            {
-                OnMessageReceived(new Message());
-            }
-        }
-
-        private void OnChatMessage(SteamFriends.ChatMsgCallback callback)
-        {
-            if (callback.ChatMsgType == EChatEntryType.ChatMsg)
-            {
-                OnMessageReceived(new Message()
-                {
-                    Text = callback.Message.Trim()
-                });
+                Bot?.OnMessageReceived(callback.Sender.ConvertToUInt64(), callback.Message);
             }
         }
 
@@ -155,7 +128,7 @@ namespace CsInvite.Bot.Steam
 
         private void OnFriendsListChanged(SteamFriends.FriendAddedCallback callback)
         {
-
+            
         }
 
         private void OnFriendsListChanged(SteamFriends.IgnoreFriendCallback callback)
@@ -163,14 +136,11 @@ namespace CsInvite.Bot.Steam
 
         }
 
-        public override void SendMessage(Base.Chat chat, string message)
+        public void SendMessage(ulong user, string message)
         {
-            var sChat = chat as Chat;
-            if (sChat == null)
-            {
-                return;
-            }
-            friends.SendChatMessage(sChat.Id, EChatEntryType.ChatMsg, message);
+            var steamUser = new SteamID();
+            steamUser.SetFromUInt64(user);
+            friends.SendChatMessage(steamUser, EChatEntryType.ChatMsg, message);
         }
 
         private void OnAccountInfo(SteamUser.AccountInfoCallback callback)

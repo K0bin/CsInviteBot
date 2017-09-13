@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace CsInvite.Website.Models
 {
-    public class SteamPlayerSummaryDto
+    public class SteamPlayerSummary
     {
-        public string SteamId { get; set; }
+        public ulong SteamId { get; set; }
         public int CommunityVisibilityState { get; set; }
         public int ProfileState { get; set; }
         public string PersonaName { get; set; }
@@ -28,7 +28,7 @@ namespace CsInvite.Website.Models
 
     public class SteamPlayerSummaryResponse
     {
-        public List<SteamPlayerSummaryDto> Players { get; set; }
+        public List<SteamPlayerSummary> Players { get; set; }
     }
 
     public class SteamPlayerSummaryRootObject
