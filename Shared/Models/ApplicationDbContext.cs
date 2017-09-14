@@ -55,6 +55,9 @@ namespace CsInvite.Shared.Models
             builder.Entity<User>()
                 .Property(u => u.UserName)
                 .IsUnicode(true);
+            builder.Entity<User>()
+                .Property(u => u.NormalizedUserName)
+                .IsUnicode(true);
 
             builder.Entity<Friend>()
                 .HasOne(f => f.User)

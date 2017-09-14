@@ -21,6 +21,8 @@ namespace CsInvite.Shared
                 .AddJsonFile("secret.json");
             var configuration = builder.Build();
             var loggerFactory = new LoggerFactory();
+            loggerFactory.AddDebug(LogLevel.Debug);
+            loggerFactory.AddConsole(configuration.GetSection("Logging"));
             return new ApplicationDbContext(new DbContextOptions<ApplicationDbContext>(), configuration, loggerFactory);
         }
     }

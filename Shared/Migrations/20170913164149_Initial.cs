@@ -9,6 +9,7 @@ namespace CsInvite.Shared.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
