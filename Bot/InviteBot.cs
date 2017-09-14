@@ -48,7 +48,7 @@ namespace CsInvite.Bot
         public void OnMessageReceived(ulong steamId, string text)
         {
             var users = db.Users
-                    .Include(u => u.Friends).ThenInclude(f => f.OtherUser)
+                    .Include(u => u.Friends).ThenInclude(f => f.OtherUser).ThenInclude(u => u.Invites)
                     .Include(u => u.Invites).ThenInclude(i => i.Lobby).ThenInclude(l => l.Members)
                     .Include(u => u.CurrentLobby).ThenInclude(l => l.Members);
             var user = users.FirstOrDefault(u => u.SteamId == steamId);
@@ -108,6 +108,7 @@ namespace CsInvite.Bot
                     steam?.SendMessage(user.SteamId, $"Lobby verlassen!");
                 }
             }
+            db.SaveChanges();
         }
 
         public void LobbyCommand(User user)
@@ -129,13 +130,17 @@ namespace CsInvite.Bot
             lobby.Created = DateTime.Now;
             lobby.LastModified = DateTime.Now;
             lobby.Owner = user;
+            lobby.Members = new List<User>();
+            lobby.Members.Add(user);
             db.Lobbies.Add(lobby);
+
+            user.CurrentLobby = lobby;
 
             //INVITES      
             var friends = user.Friends.Where(f => {
-                    var lastInvite = f.User.Invites.OrderBy(i => i.Date).LastOrDefault();
+                    var lastInvite = f.OtherUser.Invites.OrderBy(i => i.Date).LastOrDefault();
                     var minutesSinceLastInvite = (DateTime.Now - (lastInvite?.Date ?? new DateTime())).TotalMinutes;
-                    return minutesSinceLastInvite > 5 && (f.User.CurrentLobby == null || minutesSinceLastInvite > 120);
+                    return f.OtherUser.FriendsWithSteamBotIndex != null && minutesSinceLastInvite > 5 && (f.OtherUser.CurrentLobby == null || minutesSinceLastInvite > 120);
                 }).OrderBy(f => f.Priority);
 
             var invitedFriends = 0;

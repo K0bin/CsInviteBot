@@ -82,6 +82,8 @@ namespace CsInvite.Website.Controllers
 
         public async Task<IActionResult> Import()
         {
+            var dbUsers = db.Users.Include(u => u.IsInFriendsListOf);
+
             var user = await userManager.GetUserAsync(User);
             var friends = await steam.GetSteamFriendsList(user.SteamId);
             if (friends == null)
@@ -95,27 +97,27 @@ namespace CsInvite.Website.Controllers
                     continue;
                 }
 
-                var userExists = db.Users.Any(u => u.SteamId == friend.SteamId);
-                if (userExists)
-                {
-                    continue;
-                }
-
-                var steamUser = await steam.GetSteamPlayer(friend.SteamId);
-                var friendUser = steamUser.ToUser();
+                var friendUser = dbUsers.FirstOrDefault(u => u.SteamId == friend.SteamId);
                 if (friendUser == null)
                 {
-                    continue;
+                    var steamUser = await steam.GetSteamPlayer(friend.SteamId);
+                    friendUser = steamUser.ToUser();
+                    if (friendUser == null)
+                    {
+                        continue;
+                    }
+                    await userManager.CreateAsync(friendUser);
                 }
-                Console.WriteLine("====USER: " + friendUser.UserName.ToString());
-                await userManager.CreateAsync(friendUser);
 
-                /*var friendShip = new Friend
+                if (!(friendUser.IsInFriendsListOf?.Any(f => f.UserId == user.Id) ?? false))
                 {
-                    UserId = user.Id,
-                    OtherUserId = friendUser.Id,
-                };
-                db.Friends.Add(friendShip);*/
+                    var friendShip = new Friend
+                    {
+                        UserId = user.Id,
+                        OtherUserId = friendUser.Id,
+                    };
+                    db.Friends.Add(friendShip);
+                }
             }
             await db.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
