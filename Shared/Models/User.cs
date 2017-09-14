@@ -30,6 +30,10 @@ namespace CsInvite.Shared.Models
         {
             get; set;
         }
+        public bool IsOnline
+        {
+            get; set;
+        }
         public List<Friend> Friends
         {
             get; set;

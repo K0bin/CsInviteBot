@@ -59,6 +59,11 @@ namespace CsInvite.Shared.Models
                 .Property(u => u.NormalizedUserName)
                 .IsUnicode(true);
 
+            builder.Entity<User>()
+                .Property(u => u.FriendsWithSteamBotIndex)
+                .IsRequired(false)
+                .HasDefaultValue(null);
+
             builder.Entity<Friend>()
                 .HasOne(f => f.User)
                 .WithMany(u => u.Friends)
