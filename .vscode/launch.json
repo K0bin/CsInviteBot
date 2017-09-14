@@ -4,8 +4,38 @@
    // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
    "version": "0.2.0",
    "configurations": [
+       {
+           "name": "Website",
+           "type": "coreclr",
+           "request": "launch",
+           "preLaunchTask": "build",
+           "program": "${workspaceRoot}/Website/bin/Debug/netcoreapp2.0/Website.dll",
+           "args": [],
+           "cwd": "${workspaceRoot}/Website",
+           "stopAtEntry": false,
+           "launchBrowser": {
+               "enabled": true,
+               "args": "127.0.0.1:53003",
+               "windows": {
+                   "command": "cmd.exe",
+                   "args": "/C start ${auto-detect-url}"
+               },
+               "osx": {
+                   "command": "open"
+               },
+               "linux": {
+                   "command": "xdg-open"
+               }
+           },
+           "env": {
+               "ASPNETCORE_ENVIRONMENT": "Development"
+           },
+           "sourceFileMap": {
+               "/Views": "${workspaceRoot}/Website/Views"
+           }
+       },
         {
-            "name": ".NET Core Launch (console)",
+            "name": "Bot",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
