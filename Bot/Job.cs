@@ -7,14 +7,14 @@ namespace CsInvite.Bot
     public class Job
     {
         public TimeSpan Duration { get; set; }
-        public Action<Steam> Action { private get; set; }
+        public Action Action { private get; set; }
         private DateTime lastExecutionDate = new DateTime();
 
-        public bool ExecuteIfNecessary(Steam steam)
+        public bool ExecuteIfNecessary()
         {
             if ((DateTime.Now - lastExecutionDate) > Duration)
             {
-                Action(steam);
+                Action();
                 lastExecutionDate = DateTime.Now;
                 return true;
             }

@@ -33,12 +33,22 @@ namespace CsInvite.Bot
 
             jobs.Add(new Job
             {
-                Duration = new TimeSpan(0, 0, 30),
-                Action = this.RepeatInvites
+                Duration = new TimeSpan(0, 30, 0),
+                Action = this.CleanDatabase
+            });
+            jobs.Add(new Job
+            {
+                Duration = new TimeSpan(0, 5, 0),
+                Action = this.AcceptRequests
             });
             jobs.Add(new Job
             {
                 Duration = new TimeSpan(0, 1, 0),
+                Action = this.RepeatInvites
+            });
+            jobs.Add(new Job
+            {
+                Duration = new TimeSpan(0, 3, 0),
                 Action = this.SyncFriendsList
             });
         }
@@ -106,11 +116,13 @@ namespace CsInvite.Bot
                         }
                         else
                         {
+                            user.CurrentLobby.LastModified = DateTime.Now;
                             user.CurrentLobby.Members.Remove(user);
                             user.CurrentLobby = null;
                         }
                     }
                     lastInvite.Lobby.Members.Add(user);
+                    lastInvite.Lobby.LastModified = DateTime.Now;
                     user.CurrentLobby = lastInvite.Lobby;
                     steam?.SendMessage(user.SteamId, $"Lobby beigetreten! http://k0bin.dnshome.de/lobby/{lastInvite.Lobby.Id}");
                     lastInvite.Answer = Answer.Accept;
@@ -137,10 +149,12 @@ namespace CsInvite.Bot
                     {
                         user.CurrentLobby.Members.Remove(user);
                         user.CurrentLobby = null;
+                        user.CurrentLobby.LastModified = DateTime.Now;
                     }
                     if (lastInvite != null)
                     {
                         lastInvite.Answer = Answer.Decline;
+                        lastInvite.Lobby.LastModified = DateTime.Now;
                     }
                     steam?.SendMessage(user.SteamId, $"Lobby verlassen!");
                 }
@@ -183,7 +197,7 @@ namespace CsInvite.Bot
             var jobsCount = 0;
             foreach (var job in jobs)
             {
-                if (job.ExecuteIfNecessary(steam))
+                if (job.ExecuteIfNecessary())
                 {
                     jobsCount++;
                 }
@@ -191,7 +205,7 @@ namespace CsInvite.Bot
             return jobsCount;
         }
 
-        private void RepeatInvites(Steam steam)
+        private void RepeatInvites()
         {
             var lobbies = db.Lobbies.Include(l => l.Owner).ThenInclude(u => u.Friends).ThenInclude(f => f.OtherUser).ThenInclude(l => l.Invites).ThenInclude(i => i.Recipient)
                 .Include(l => l.Invites).ThenInclude(i => i.Recipient).ThenInclude(u => u.CurrentLobby)
@@ -269,7 +283,7 @@ namespace CsInvite.Bot
             }
         }
 
-        public void SyncFriendsList(Steam steam)
+        public void SyncFriendsList()
         {
             var steamFriends = steam.GetFriends();
             var ids = steamFriends.Select(s => s.SteamId);
@@ -296,6 +310,31 @@ namespace CsInvite.Bot
                         || steamUser.State == EPersonaState.Busy
                         || steamUser.State == EPersonaState.LookingToTrade
                         || steamUser.State == EPersonaState.Max;
+                }
+            }
+            db.SaveChanges();
+        }
+
+        public void AcceptRequests()
+        {
+            //TODO
+        }
+
+        public void CleanDatabase()
+        {
+            var lobbies = db.Lobbies;
+            foreach (var lobby in lobbies)
+            {
+                if ((DateTime.Now - lobby.LastModified).TotalMinutes > 120)
+                {
+                    db.Lobbies.Remove(lobby);
+                    continue;
+                }
+
+                var staleInvites = lobby.Invites.Where(i => i.Answer == Answer.None && (DateTime.Now - i.Date).TotalMinutes > 20);
+                foreach (var invite in staleInvites)
+                {
+                    invite.Answer = Answer.Decline;
                 }
             }
             db.SaveChanges();
