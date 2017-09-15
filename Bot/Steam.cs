@@ -20,7 +20,7 @@ namespace CsInvite.Bot
         public bool IsRunning { get; private set; } = false;
 
         private IConfiguration configuration;
-        
+
         public InviteBot Bot
         {
             get; set;
@@ -45,7 +45,7 @@ namespace CsInvite.Bot
             manager.Subscribe<SteamGameCoordinator.MessageCallback>(OnGameCoordinator);
             manager.Subscribe<SteamFriends.FriendAddedCallback>(OnFriendsListChanged);
             manager.Subscribe<SteamFriends.IgnoreFriendCallback>(OnFriendsListChanged);
-            
+
         }
 
         public void Connect()
@@ -53,12 +53,12 @@ namespace CsInvite.Bot
             steamClient.Connect();
             IsRunning = true;
         }
-        
+
         public void Update()
         {
             if (IsRunning)
             {
-                manager.RunWaitCallbacks();
+                manager.RunCallbacks();
             }
         }
 
@@ -109,7 +109,7 @@ namespace CsInvite.Bot
             var friends = GetFriends();
             foreach (var friend in friends)
             {
-                
+
             }
         }
 
@@ -128,7 +128,7 @@ namespace CsInvite.Bot
 
         private void OnFriendsListChanged(SteamFriends.FriendAddedCallback callback)
         {
-            
+
         }
 
         private void OnFriendsListChanged(SteamFriends.IgnoreFriendCallback callback)
@@ -156,14 +156,28 @@ namespace CsInvite.Bot
             friends.AddFriend(id);
         }
 
-        public List<ulong> GetFriends()
+        public List<SteamFriend> GetFriends()
         {
-            var friends = new List<ulong>();
+            var steamFriends = new List<SteamFriend>();
             for (int i = 0; i < this.friends.GetFriendCount(); i++)
             {
-                friends.Add(this.friends.GetFriendByIndex(i).ConvertToUInt64());
+                var id = this.friends.GetFriendByIndex(i).ConvertToUInt64();
+                steamFriends.Add(new SteamFriend
+                {
+                    SteamId = id,
+                    Persona = this.friends.GetFriendPersonaName(id),
+                    State = this.friends.GetFriendPersonaState(id)
+                });
             }
-            return friends;
+            return steamFriends;
+        }
+
+        public class SteamFriend
+        {
+            public ulong SteamId { get; set; }
+            public EPersonaState State { get; set; }
+            public string Persona { get; set; }
+            public string AvatarUrl { get; set; }
         }
     }
 }

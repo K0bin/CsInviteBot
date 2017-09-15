@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Website", "Website\Website.csproj", "{F55736AD-9777-4D81-AB9F-AC4E96F7DE40}"
 EndProject
@@ -9,11 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNet.Security.OpenId.Stea
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNet.Security.OpenId", "AspNet.Security.OpenId.Providers\src\AspNet.Security.OpenId\AspNet.Security.OpenId.csproj", "{3E9AFF33-AED1-4EA4-B734-A1400A6BC574}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jobs", "Jobs\Jobs.csproj", "{A780DE48-BFD9-4550-A3B2-D98AC6211339}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bot", "Bot\Bot.csproj", "{41B655B3-1419-421B-8D70-459E115EA5AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bot", "Bot\Bot.csproj", "{41B655B3-1419-421B-8D70-459E115EA5AB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{6B3A9CA9-EB60-4D50-95F9-073C4D579798}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{6B3A9CA9-EB60-4D50-95F9-073C4D579798}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,10 +31,6 @@ Global
 		{3E9AFF33-AED1-4EA4-B734-A1400A6BC574}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E9AFF33-AED1-4EA4-B734-A1400A6BC574}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E9AFF33-AED1-4EA4-B734-A1400A6BC574}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A780DE48-BFD9-4550-A3B2-D98AC6211339}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A780DE48-BFD9-4550-A3B2-D98AC6211339}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A780DE48-BFD9-4550-A3B2-D98AC6211339}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A780DE48-BFD9-4550-A3B2-D98AC6211339}.Release|Any CPU.Build.0 = Release|Any CPU
 		{41B655B3-1419-421B-8D70-459E115EA5AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{41B655B3-1419-421B-8D70-459E115EA5AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41B655B3-1419-421B-8D70-459E115EA5AB}.Release|Any CPU.ActiveCfg = Release|Any CPU

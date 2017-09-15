@@ -2,7 +2,7 @@
 @model IndexViewModel;
 
 <div>
-    <h1>Lobby vom @Model.ToString(), gestartet von @Model.Owner.UserName</h1>
+    <h1>Lobby vom @Model.Started.ToString(), gestartet von @Model.Owner.UserName</h1>
     <ul>
         @foreach (var member in Model.Members)
         {
