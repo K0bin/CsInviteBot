@@ -22,6 +22,8 @@ namespace CsInvite.Shared.Models
         }
         [Required]
         public DateTime Date { get; set; }
+        [Required]
+        public DateTime LastRefreshed { get; set; }
         public Answer Answer { get; set; }
     }
 
