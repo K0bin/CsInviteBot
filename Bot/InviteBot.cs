@@ -39,12 +39,17 @@ namespace CsInvite.Bot
             jobs.Add(new Job
             {
                 Duration = new TimeSpan(0, 5, 0),
-                Action = this.AcceptRequests
+                Action = this.AcceptSteamFriends
             });
             jobs.Add(new Job
             {
                 Duration = new TimeSpan(0, 1, 0),
-                Action = this.RepeatInvites
+                Action = this.RefreshInvites
+            });
+            jobs.Add(new Job
+            {
+                Duration = new TimeSpan(0, 3, 0),
+                Action = this.InviteToLobby
             });
             jobs.Add(new Job
             {
@@ -187,8 +192,7 @@ namespace CsInvite.Bot
             user.CurrentLobby = lobby;
             steam?.SendMessage(user.SteamId, $"Lobby erstellt: {MakeLobbyLink(lobby.Id)}");
 
-            //INVITES      
-            InviteFriends(lobby, steam);
+            InviteToLobby(lobby);
             db.SaveChanges();
         }
 
@@ -205,54 +209,69 @@ namespace CsInvite.Bot
             return jobsCount;
         }
 
-        private void RepeatInvites()
+        public void RefreshInvites()
         {
-            var lobbies = db.Lobbies.Include(l => l.Owner).ThenInclude(u => u.Friends).ThenInclude(f => f.OtherUser).ThenInclude(l => l.Invites).ThenInclude(i => i.Recipient)
+            var lobbies = db.Lobbies
                 .Include(l => l.Invites).ThenInclude(i => i.Recipient).ThenInclude(u => u.CurrentLobby)
-                .Include(l => l.Members).ThenInclude(u => u.Invites);
+                .Include(l => l.Members).ThenInclude(u => u.Invites)
+                .Where(l => l.Invites != null && l.Invites.Count > 0);
 
             foreach (var lobby in lobbies)
             {
-                RefreshInvites(lobby, steam);
-                InviteFriends(lobby, steam);
+                var membersCount = lobby.Members.Count;
+                var openInvitesCount = lobby.Invites.Count(i =>
+                {
+                    var lastInvite = i.Recipient.Invites.OrderBy(_i => _i.Date).LastOrDefault();
+                    var minutesSinceLastInvite = (DateTime.Now - (lastInvite?.Date ?? new DateTime())).TotalMinutes;
+                    var minutesSinceThisInvite = (DateTime.Now - i.Date).TotalMinutes;
+                    var minutesSinceRefreshed = (DateTime.Now - i.LastRefreshed).TotalMinutes;
+                    return i.Answer == Answer.None && minutesSinceLastInvite < 15 && minutesSinceRefreshed > 3 && i.Recipient.IsOnline && (i.Recipient.CurrentLobby == null || minutesSinceLastInvite > 45);
+                });
+                var slotsLeft = 5 - membersCount - openInvitesCount;
+                if (slotsLeft <= 0)
+                {
+                    return;
+                }
+
+                var invitedFriends = lobby.Invites.Where(i =>
+                {
+                    var lastInvite = i.Recipient.Invites.OrderBy(_i => _i.Date).LastOrDefault();
+                    var minutesSinceLastInvite = (DateTime.Now - (lastInvite?.Date ?? new DateTime())).TotalMinutes;
+                    var minutesSinceThisInvite = (DateTime.Now - i.Date).TotalMinutes;
+                    return i.Answer == Answer.None
+                    && minutesSinceThisInvite > 5 && minutesSinceThisInvite < 20 && i.Recipient.IsOnline && (i.Recipient.CurrentLobbyId == null || minutesSinceLastInvite > 45);
+                });
+                foreach (var friend in invitedFriends)
+                {
+                    friend.LastRefreshed = DateTime.Now;
+                    steam.SendMessage(friend.Recipient.SteamId, AskForCs(lobby));
+                    steam.SendMessage(lobby.Owner.SteamId, friend.Recipient.UserName + " wurde erneut gefragt.");
+                }
             }
         }
 
-        public void RefreshInvites(Lobby lobby, Steam steam)
+        public void InviteToLobby()
+        {
+            var lobbies = db.Lobbies.Include(l => l.Owner).ThenInclude(u => u.Friends).ThenInclude(f => f.OtherUser).ThenInclude(l => l.Invites).ThenInclude(i => i.Recipient)
+                .Include(l => l.Invites).ThenInclude(i => i.Recipient).ThenInclude(u => u.CurrentLobby)
+                .Include(l => l.Members).ThenInclude(u => u.Invites)
+                .Where(l => l.Members.Count < 5);
+
+            foreach (var lobby in lobbies)
+            {
+                InviteToLobby(lobby);
+            }
+        }
+
+        public void InviteToLobby(Lobby lobby)
         {
             var membersCount = lobby.Members.Count;
-            var openInvitesCount = lobby.Invites.Count(i => {
-                var lastInvite = i.Recipient.Invites.OrderBy(_i => _i.Date).LastOrDefault();
-                var minutesSinceLastInvite = (DateTime.Now - (lastInvite?.Date ?? new DateTime())).TotalMinutes;
-                return i.Answer == Answer.None && (DateTime.Now - i.Date).TotalMinutes < 10 && i.Recipient.IsOnline && (i.Recipient.CurrentLobby == null || minutesSinceLastInvite > 45);
-            });
-            var slotsLeft = 5 - membersCount - openInvitesCount;
-            if (slotsLeft <= 0)
+            var openInvitesCount = lobby.Invites.Count(i =>
             {
-                return;
-            }
-
-            var invitedFriends = lobby.Invites.Where(i => {
                 var lastInvite = i.Recipient.Invites.OrderBy(_i => _i.Date).LastOrDefault();
                 var minutesSinceLastInvite = (DateTime.Now - (lastInvite?.Date ?? new DateTime())).TotalMinutes;
                 var minutesSinceThisInvite = (DateTime.Now - i.Date).TotalMinutes;
-                return i.Answer == Answer.None
-                && minutesSinceThisInvite > 5 && minutesSinceThisInvite < 20 && i.Recipient.IsOnline && (i.Recipient.CurrentLobbyId == null || minutesSinceLastInvite > 45);
-            });
-            foreach (var friend in invitedFriends)
-            {
-                steam.SendMessage(friend.Recipient.SteamId, AskForCs(lobby));
-                steam.SendMessage(lobby.Owner.SteamId, friend.Recipient.UserName + " wurde erneut gefragt.");
-            }
-        }
-
-        public void InviteFriends(Lobby lobby, Steam steam)
-        {
-            var membersCount = lobby.Members.Count;
-            var openInvitesCount = lobby.Invites.Count(i => {
-                var lastInvite = i.Recipient.Invites.OrderBy(_i => _i.Date).LastOrDefault();
-                var minutesSinceLastInvite = (DateTime.Now - (lastInvite?.Date ?? new DateTime())).TotalMinutes;
-                return i.Answer == Answer.None && (DateTime.Now - i.Date).TotalMinutes < 10 && i.Recipient.IsOnline && (i.Recipient.CurrentLobby == null || minutesSinceLastInvite > 45);
+                return i.Answer == Answer.None && minutesSinceThisInvite < 10 && i.Recipient.IsOnline && (i.Recipient.CurrentLobby == null || minutesSinceLastInvite > 45);
             });
             var slotsLeft = 5 - membersCount - openInvitesCount;
             if (slotsLeft <= 0)
@@ -264,7 +283,7 @@ namespace CsInvite.Bot
             {
                 var lastInvite = f.OtherUser.Invites.OrderBy(i => i.Date).LastOrDefault();
                 var minutesSinceLastInvite = (DateTime.Now - (lastInvite?.Date ?? new DateTime())).TotalMinutes;
-                return f.OtherUser.FriendsWithSteamBotIndex != null && f.OtherUser.IsOnline && minutesSinceLastInvite > 5 && lastInvite?.LobbyId != lobby.Id && f.OtherUser.CurrentLobbyId != lobby.Id && (f.OtherUser.CurrentLobby == null || minutesSinceLastInvite > 120);
+                return f.OtherUser.FriendsWithSteamBotIndex != null && f.OtherUser.IsOnline && lastInvite?.LobbyId != lobby.Id && f.OtherUser.CurrentLobbyId != lobby.Id && (f.OtherUser.CurrentLobby == null || minutesSinceLastInvite > 120);
             }).OrderBy(f => f.Priority).Take(slotsLeft);
 
             foreach (var friend in friends)
@@ -276,7 +295,8 @@ namespace CsInvite.Bot
                 {
                     LobbyId = lobby.Id,
                     RecipientId = other.Id,
-                    Date = DateTime.Now
+                    Date = DateTime.Now,
+                    LastRefreshed = DateTime.Now
                 };
                 db.Invites.Add(invite);
                 other.Invites.Add(invite);
@@ -304,25 +324,20 @@ namespace CsInvite.Bot
                 if (steamUser != null)
                 {
                     user.UserName = steamUser.Persona;
-                    user.IsOnline = steamUser.State == EPersonaState.Online
-                        || steamUser.State == EPersonaState.LookingToPlay
-                        || steamUser.State == EPersonaState.Away
-                        || steamUser.State == EPersonaState.Busy
-                        || steamUser.State == EPersonaState.LookingToTrade
-                        || steamUser.State == EPersonaState.Max;
+                    user.IsOnline = steamUser.State != EPersonaState.Offline;
                 }
             }
             db.SaveChanges();
         }
 
-        public void AcceptRequests()
+        public void AcceptSteamFriends()
         {
             //TODO
         }
 
         public void CleanDatabase()
         {
-            var lobbies = db.Lobbies;
+            var lobbies = db.Lobbies.Include(l => l.Invites);
             foreach (var lobby in lobbies)
             {
                 if ((DateTime.Now - lobby.LastModified).TotalMinutes > 120)
@@ -331,7 +346,7 @@ namespace CsInvite.Bot
                     continue;
                 }
 
-                var staleInvites = lobby.Invites.Where(i => i.Answer == Answer.None && (DateTime.Now - i.Date).TotalMinutes > 20);
+                var staleInvites = lobby.Invites.Where(i => i.Answer == Answer.None && (DateTime.Now - i.Date).TotalMinutes > 15);
                 foreach (var invite in staleInvites)
                 {
                     invite.Answer = Answer.Decline;
